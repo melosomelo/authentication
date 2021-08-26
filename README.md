@@ -1,9 +1,9 @@
 # authentication
 
 If you're here, then you probably came from my Medium articles on
-authentication, or maybe not. Anyway, this repository contains basic version of
-an authentication flow using sessions (so far). As I create more articles on
-authentication, I'll create some new basic versions as well.
+authentication, or maybe not. Anyway, this repository contains basic
+authentication flows using different methods (only sessions so far). As I write
+more articles, different methods will be uploaded here.
 
 ## Articles
 
