@@ -7,4 +7,4 @@ authentication, I'll create some new basic versions as well.
 
 ## Articles
 
-[Authentication in Web Apps, Part 1: Sessions]()
+[Authentication in Web Apps, Part 1: Sessions](https://mmrndev.medium.com/d3c5bf4f26b7)
