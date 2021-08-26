@@ -1,3 +1,4 @@
 sessions/.env
 sessions/node_modules
 sessions/dump.rdb
+dump.rdb

@@ -3,13 +3,15 @@ const express = require("express");
 const redis = require("redis");
 const session = require("express-session");
 
-const app = express();
+const csurf = require("csurf");
 const RedisStore = require("connect-redis")(session);
 const authMiddleware = require("./middlewares/auth");
-const redisClient = redis.createClient();
 const db = require("./db");
 
+const app = express();
+const redisClient = redis.createClient();
 const sessionDuration = 1 * 1000 * 60; // 1 minute
+const csrfProtection = csurf();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -43,6 +45,46 @@ app.get("/", (req, res, next) => {
 	`);
 });
 
+app.get(
+  "/changeEmail",
+  csrfProtection,
+  authMiddleware,
+  async (req, res, next) => {
+    console.log(req.csrfToken());
+    res.send(
+      `<h1>change email</h1>
+    <form action="http://localhost:3000/changeEmail" method="post">
+      <input name="newEmail" />
+      <input name="_csrf" value="${req.csrfToken()}" type="hidden"/>
+      <button type="submit">Change email</h1>
+    </form>`
+    );
+  }
+);
+
+app.post(
+  "/changeEmail",
+  csrfProtection,
+  authMiddleware,
+  async (req, res, next) => {
+    const {
+      body: { newEmail },
+      session,
+    } = req;
+    console.log(session, newEmail);
+    await db.query("UPDATE users SET email=$1 WHERE id=$2", [
+      newEmail,
+      session.user.id,
+    ]);
+    session.destroy((err) => {
+      if (err) {
+        console.log(err);
+      }
+      return res.redirect("/");
+    });
+  }
+);
+
 app.post("/login", async (req, res, next) => {
   const {
     body: { email, password },
@@ -56,7 +98,7 @@ app.post("/login", async (req, res, next) => {
   if (result.rowCount === 0) {
     return res
       .status(401)
-      .send("<h1>Invalid credentials!</h1><a href='/'>Go back</>");
+      .send("<h1>Invalid credentials!</h1><a href='/'>Go back</a>");
   }
   // storing the user in the session for future information
   req.session.user = result.rows[0];
@@ -74,7 +116,12 @@ app.post("/logout", authMiddleware, async (req, res, next) => {
 
 app.get("/dashboard", authMiddleware, async (req, res, next) => {
   res.send(
-    `<h1>welcome to the dashboard</h1><form action="http://localhost:3000/logout" method="post"><button type="submit">Logout</button></form>`
+    `<h1>welcome to the dashboard</h1> 
+      <form action="http://localhost:3000/logout" method="post">
+        <button type="submit">Logout</button>
+      </form>
+    <a href="/changeEmail">Change your email</a>
+      `
   );
 });
 
