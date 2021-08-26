@@ -1,0 +1,3 @@
+sessions/.env
+sessions/node_modules
+sessions/dump.rdb
